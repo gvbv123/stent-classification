@@ -1,0 +1,17 @@
+# 覆盖为：全图模式（单通道）
+OUTPUT:
+  RUN_NAME: "50li9wuyanmo"
+
+INPUT:
+  MODE: "full"
+  CHANNELS: 1
+  IMG_SIZE: 300
+
+MODEL:
+  BACKBONE: "efficientnet_b3"
+
+AUG:
+  LEVEL: "light"   # 首次跑建议 light
+
+TEST:
+  CKPT_PATH: "F:/deepMDA/9yue9ri/50li9wuyanmo/20250913-162410/runs/best.ckpt"

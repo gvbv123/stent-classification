@@ -1,0 +1,17 @@
+# 覆盖为：掩膜引导（concat 2 通道）
+OUTPUT:
+  RUN_NAME: "50li9"
+
+INPUT:
+  MODE: "mask_concat"
+  CHANNELS: 2
+  IMG_SIZE: 256
+
+MODEL:
+  BACKBONE: "resnet18"
+
+AUG:
+  LEVEL: "light"
+
+TEST:
+  CKPT_PATH: "F:/deepMDA/9yue9ri/50li9/20250912-161910/runs/best.ckpt"

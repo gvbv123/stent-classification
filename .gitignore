@@ -1,0 +1,28 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints/
+
+# Virtual env
+.venv/
+env/
+venv/
+
+# OS
+.DS_Store
+
+# Data & outputs
+data/
+results/
+export/
+logs/
+runs/
+
+# IDE
+.vscode/
+.idea/
+
+# Checkpoints
+*.pt
+*.pth
+*.ckpt
