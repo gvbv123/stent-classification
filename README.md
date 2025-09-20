@@ -4,6 +4,7 @@
 
 ## 数据下载与放置
 从 Zenodo 下载数据集：**DOI: 10.5281/zenodo.17164388**
+https://doi.org/10.5281/zenodo.17164388
 
 解压后目录结构示例：
 dataset_root/
