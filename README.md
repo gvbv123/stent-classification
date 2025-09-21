@@ -32,14 +32,8 @@ dataset_root/
 ```bash
 python scripts/train_cv.py --cfg configs/full_input.yaml
 2. External testing (locked evaluation)
-bash
-复制代码
 python scripts/test_locked.py --cfg configs/full_input.yaml
 3. Grad-CAM batch visualization
-bash
-复制代码
 python scripts/gradcam_batch.py --cfg configs/mask_guided.yaml
 4. Generate figures (ROC, calibration curve, DCA)
-bash
-复制代码
 python scripts/make_figures.py
