@@ -22,8 +22,7 @@ dataset_root/
 │ ├── train.csv
 │ ├── test.csv
 
-yaml
-复制代码
+
 
 ---
 
