@@ -27,9 +27,9 @@ dataset_root/
 ---
 
 ## ⚙️ Full Pipeline Command List
-
-###  Training (5-fold cross-validation)
+###  
 ```bash
+1. Training (5-fold cross-validation)
 python scripts/train_cv.py --cfg configs/full_input.yaml
 2. External testing (locked evaluation)
 python scripts/test_locked.py --cfg configs/full_input.yaml
