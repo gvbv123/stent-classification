@@ -1,39 +1,39 @@
-# ====== 全局默认配置 ======
+# ====== Global Default Configuration ======
 OUTPUT:
-  ROOT: "F:\\deepMDA\\9yue9ri"                 # 实验根目录
-  RUN_NAME: "baseline"                # 语义化名称，子配置会覆盖
-  USE_TIMESTAMP: true                 # 每次运行生成时间戳子目录
-  TIMESTAMP_FMT: "%Y%m%d-%H%M%S"      # 20250909-2142
+  ROOT: "${OUTPUT_PATH}/9yue9ri"                # Experiment root directory
+  RUN_NAME: "baseline"                          # Semantic name, sub-configurations will override this
+  USE_TIMESTAMP: true                           # Generate timestamp subdirectory on every run
+  TIMESTAMP_FMT: "%Y%m%d-%H%M%S"                # Timestamp format: 20250909-2142
 
 DATA:
   TRAIN:
-    IMAGE_DIR: "F:/cardiologydicom/dicomshujubiaozhu/he/shujuqingxi10tongcipingheng237/shujuqingxi12tongcipingheng2379/187/images"
-    MASK_DIR:  "F:/cardiologydicom/dicomshujubiaozhu/he/shujuqingxi10tongcipingheng237/shujuqingxi12tongcipingheng2379/187/yanmo/ji"
-    LABEL_CSV: "F:/cardiologydicom/dicomshujubiaozhu/he/shujuqingxi10tongcipingheng237/shujuqingxi12tongcipingheng2379/187/label187.csv"
+    IMAGE_DIR: "${DATA_PATH}/train/images"      # Path to training images
+    MASK_DIR:  "${DATA_PATH}/train/masks"       # Path to training masks
+    LABEL_CSV: "${DATA_PATH}/train/label.csv"   # Path to training labels
   TEST:
-    IMAGE_DIR: "F:/cardiologydicom/dicomshujubiaozhu/he/shujuqingxi10tongcipingheng237/shujuqingxi12tongcipingheng2379/50/images"
-    MASK_DIR:  "F:/cardiologydicom/dicomshujubiaozhu/he/shujuqingxi10tongcipingheng237/shujuqingxi12tongcipingheng2379/50/yanmo/ji"
-    LABEL_CSV: "F:/cardiologydicom/dicomshujubiaozhu/he/shujuqingxi10tongcipingheng237/shujuqingxi12tongcipingheng2379/50/label50.csv"
+    IMAGE_DIR: "${DATA_PATH}/test/images"       # Path to testing images
+    MASK_DIR:  "${DATA_PATH}/test/masks"        # Path to testing masks
+    LABEL_CSV: "${DATA_PATH}/test/label.csv"    # Path to testing labels
   SPLITS:
     FOLDS: 5
-    FIXED_SPLIT_JSON: "splits/train_val_test_seed2025.json"  # 训练域内5折划分
-    EXTERNAL_IDS:     "splits/external_test_ids.txt"         # 外部50例的ID清单
+    FIXED_SPLIT_JSON: "splits/train_val_test_seed2025.json"  # 5-fold split within training domain
+    EXTERNAL_IDS:     "splits/external_test_ids.txt"         # External 50 cases' ID list
   MASK:
-    BINARY_NORM: true  # 读取时将 0/255 规范为 0/1
+    BINARY_NORM: true  # Normalize 0/255 to 0/1 when reading
 
 INPUT:
-  MODE: "mask_concat"        # ["full","mask_concat"] （soft 可后续加）
-  IMG_SIZE: 256       # 默认256；支持 384 / 512
-  CHANNELS: 2         # full=1, mask_concat=2
+  MODE: "mask_concat"        # ["full", "mask_concat"]
+  IMG_SIZE: 256              # Default: 256; supports 384/512
+  CHANNELS: 2                # full=1, mask_concat=2
 
 PREPROCESS:
-  CLIP_PERCENTILES: [1.0, 99.0]   # p1–p99 裁剪
-  SCALE_TO_01: true               # /255 → [0,1]
-  NORM: "zscore_dataset"          # 用训练集统计 mean/std
-  NORM_STATS_FROM: "train_only"
+  CLIP_PERCENTILES: [1.0, 99.0]   # Clip values from p1 to p99
+  SCALE_TO_01: true               # Scale to [0,1] by dividing by 255
+  NORM: "zscore_dataset"          # Normalize using training dataset mean/std
+  NORM_STATS_FROM: "train_only"   # Calculate stats from the training set only
 
 AUG:
-  LEVEL: "light"      # ["light","strong","none"]
+  LEVEL: "light"      # ["light", "strong", "none"]
   # light
   ROT_DEG: 7
   TRANS_SLIDE: 0.05
@@ -43,7 +43,7 @@ AUG:
   GAMMA: 0.10
   MOTION_BLUR_PROB: 0.10
   CLAHE_PROB: 0.20
-  # strong（当 LEVEL=strong 时读取下面这些）
+  # strong (when LEVEL="strong", use the following settings)
   STRONG:
     ROT_DEG: 10
     TRANS_SLIDE: 0.08
@@ -55,21 +55,21 @@ AUG:
     CLAHE_PROB: 0.30
 
 MODEL:
-  BACKBONE: "efficientnet_b3"     # 备选：resnet18 / convnext_tiny / densenet121 / swin_tiny / efficientnet_b0 / efficientnet_b2 / efficientnet_b3
+  BACKBONE: "efficientnet_b3"     # Available models: resnet18 / convnext_tiny / densenet121 / swin_tiny / efficientnet_b0 / efficientnet_b2 / efficientnet_b3
   PRETRAINED: false
-  CKPT_PATH: "F:/deepMDA/9yue9ri/50li9/efficientnet_b320250912-161910/runs/best.ckpt"            # 可留空；也可以直接写绝对路径
+  CKPT_PATH: "${MODEL_PATH}/efficientnet_b320250912-161910/runs/best.ckpt"   # Leave empty or specify absolute path
   DROPOUT: 0.2
 
 LOSS:
-  TYPE: "bce_posweight"           # 备选 "focal"
+  TYPE: "bce_posweight"           # Available options: "focal"
   FOCAL_GAMMA: 2.0
-  FOCAL_ALPHA: null               # 如需 focal，可设 0.25~0.5
+  FOCAL_ALPHA: null               # If using focal, set between 0.25~0.5
 
 OPTIM:
   OPTIMIZER: "adamw"
   LR: 0.0003
   WEIGHT_DECAY: 0.0001
-  SCHEDULER: "steplr"             # 备选 "steplr"，"cosine"
+  SCHEDULER: "steplr"             # Available options: "steplr", "cosine"
   WARMUP_EPOCHS: 3
   STEPLR_STEP: 10
   STEPLR_GAMMA: 0.1
@@ -81,19 +81,19 @@ TRAIN:
   GRAD_CLIP_NORM: 1.0
   EARLY_STOP_METRIC: "val_auc"
   EARLY_STOP_PATIENCE: 10
-  SEED: 2025                     # 如需多随机种子，可重复跑 2023/2024
+  SEED: 2025                     # For multiple random seeds, can rerun with 2023/2024
 
 THRESHOLD:
-  SELECTION: "youden"            # ["youden","max_f1","fixed_0.5"]
+  SELECTION: "youden"            # ["youden", "max_f1", "fixed_0.5"]
   FIXED: 0.5
 
 STATS:
-  AUC_CI: "delong"               # 主文 DeLong
-  BOOTSTRAP_ITERS: 2000          # 补充材料
+  AUC_CI: "delong"               # Main paper: DeLong test
+  BOOTSTRAP_ITERS: 2000          
   BOOTSTRAP_STRATIFY: ["label"]
 
 DCA:
-  EXPORT_CSV: true               # Python 仅导出 CSV，R 端绘图
+  EXPORT_CSV: true               
   THRESH_MIN: 0.05
   THRESH_MAX: 0.60
   THRESH_STEP: 0.01
@@ -103,8 +103,8 @@ XAI:
   TARGET_LAYER:
     resnet18: "layer4[-1].conv2"
     efficientnet_b0: "features[-1]"
-    efficientnet_b2: "features[-1]"    # ← 新增
-    efficientnet_b3: "features[-1]"    # ← 新增
+    efficientnet_b2: "features[-1]"    
+    efficientnet_b3: "features[-1]"    
     convnext_tiny: "features[-1]"
     densenet121: "features.denseblock4"
     swin_tiny: "attn_rollout"
