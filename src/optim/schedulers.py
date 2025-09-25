@@ -4,7 +4,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
 
 class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
     """
-    余弦退火带 warmup 的 scheduler
+    Cosine annealing learning rate scheduler with warmup.
     """
     def __init__(self, optimizer, warmup_epochs, max_epochs, min_lr=1e-6, last_epoch=-1):
         self.warmup_epochs = warmup_epochs
@@ -15,10 +15,10 @@ class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
     def get_lr(self):
         cur_epoch = self.last_epoch
         if cur_epoch < self.warmup_epochs:
-            # warmup: 线性增加
+            # warmup: linearly increase the learning rate
             return [base_lr * (cur_epoch + 1) / self.warmup_epochs for base_lr in self.base_lrs]
         else:
-            # cosine 退火
+            # cosine annealing
             progress = (cur_epoch - self.warmup_epochs) / float(self.max_epochs - self.warmup_epochs)
             return [
                 self.min_lr + (base_lr - self.min_lr) * 0.5 * (1.0 + math.cos(math.pi * progress))
@@ -28,7 +28,7 @@ class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
 
 def get_scheduler(cfg, optimizer):
     """
-    根据配置创建调度器
+    Create a scheduler based on the configuration.
     cfg["OPTIM"]["SCHEDULER"]: "cosine" / "steplr"
     cfg["TRAIN"]["EPOCHS"]
     cfg["OPTIM"]["WARMUP_EPOCHS"]
@@ -50,4 +50,4 @@ def get_scheduler(cfg, optimizer):
         gamma = float(cfg["OPTIM"].get("STEPLR_GAMMA", 0.1))
         return StepLR(optimizer, step_size=step, gamma=gamma)
     else:
-        raise ValueError(f"未知调度器: {sched_name}")
+        raise ValueError(f"Unknown scheduler: {sched_name}")
