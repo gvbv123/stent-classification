@@ -5,9 +5,9 @@ from sklearn.linear_model import LogisticRegression
 
 def compute_calibration(y_true, y_prob, n_bins=10):
     """
-    计算校准相关指标
+    Compute calibration-related metrics.
     Returns:
-        dict, curve points
+        dict: Contains Brier score, calibration slope, intercept, and curve points.
     """
     y_true = np.array(y_true)
     y_prob = np.array(y_prob)
@@ -15,10 +15,10 @@ def compute_calibration(y_true, y_prob, n_bins=10):
     # Brier score
     brier = brier_score_loss(y_true, y_prob)
 
-    # 校准曲线 (等分概率段)
+    # Calibration curve (uniform probability bins)
     prob_true, prob_pred = calibration_curve(y_true, y_prob, n_bins=n_bins, strategy="uniform")
 
-    # 校准斜率/截距 (logit 回归)
+    # Calibration slope/intercept (logistic regression)
     eps = 1e-6
     logits = np.log(y_prob + eps) - np.log(1 - y_prob + eps)
     logits = logits.reshape(-1, 1)
