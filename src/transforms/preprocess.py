@@ -3,20 +3,20 @@ import cv2
 from typing import Tuple, Optional, Dict, Any
 
 # ------------------------------
-# 基础预处理函数
+# Basic preprocessing functions
 # ------------------------------
 
 def percentile_clip(img: np.ndarray, p_low: float = 1.0, p_high: float = 99.0) -> np.ndarray:
     """
-    按百分位裁剪强度（用于8-bit灰度）。不改变 dtype，仅裁剪。
+    Clip intensities based on percentiles (for 8-bit grayscale). Does not change dtype, only clips.
     """
-    assert img.ndim == 2, "expect HxW grayscale"
+    assert img.ndim == 2, "Expect HxW grayscale"
     lo = np.percentile(img, p_low)
     hi = np.percentile(img, p_high)
     if hi <= lo:
         return img.copy()
     img_clipped = np.clip(img, lo, hi)
-    # 线性拉伸到 [0, 255]
+    # Linearly stretch to [0, 255]
     img_clipped = (img_clipped - lo) / (hi - lo + 1e-8)
     img_clipped = (img_clipped * 255.0).astype(np.float32)
     return img_clipped
@@ -24,7 +24,7 @@ def percentile_clip(img: np.ndarray, p_low: float = 1.0, p_high: float = 99.0) -
 
 def scale_to_01(img: np.ndarray) -> np.ndarray:
     """
-    将 0-255 浮点图缩放到 [0,1]
+    Scale the [0,255] image to [0,1]
     """
     img = img.astype(np.float32)
     return img / 255.0
@@ -36,8 +36,8 @@ def resize_image_and_mask(
     size: int
 ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
     """
-    统一尺寸到 (size, size)
-    图像：双线性；掩膜：最近邻（保持二值）
+    Resize to (size, size)
+    Image: bilinear; mask: nearest neighbor (keep binary)
     """
     img_resized = cv2.resize(img, (size, size), interpolation=cv2.INTER_LINEAR)
     mask_resized = None
@@ -48,7 +48,7 @@ def resize_image_and_mask(
 
 class DatasetZScore:
     """
-    用训练集统计到的 mean/std 对图像通道 z-score 标准化（掩膜不变）
+    Standardize the image channels using mean/std obtained from the training set (mask remains unchanged)
     """
     def __init__(self, mean: float, std: float):
         self.mean = float(mean)
@@ -61,7 +61,7 @@ class DatasetZScore:
 
 def apply_clahe(img: np.ndarray, clip_limit: float = 2.0, tile_grid_size: int = 8) -> np.ndarray:
     """
-    对 [0,1] 浮点图应用 CLAHE（转换到 0-255 再返回 [0,1]）
+    Apply CLAHE to [0,1] float image (convert to 0-255, apply CLAHE, then return [0,1])
     """
     img_255 = np.clip(img * 255.0, 0, 255).astype(np.uint8)
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(tile_grid_size, tile_grid_size))
@@ -70,14 +70,14 @@ def apply_clahe(img: np.ndarray, clip_limit: float = 2.0, tile_grid_size: int = 
 
 
 # ------------------------------
-# 组合式 Transform（不依赖 Albumentations）
-# 用于 val/test 或作为增强前的公共预处理
+# Composite Transform (no dependence on Albumentations)
+# Common preprocessing for val/test or as preprocessing before augmentation
 # ------------------------------
 
 class BasePreprocess:
     """
-    公共预处理流水线：
-      p1–p99 裁剪 -> /255 -> resize -> (可选) z-score
+    Common preprocessing pipeline:
+      p1–p99 clipping -> /255 -> resize -> (optional) z-score
     """
     def __init__(
         self,
@@ -94,16 +94,16 @@ class BasePreprocess:
             self.znorm = DatasetZScore(zscore_stats["mean"], zscore_stats["std"])
 
     def __call__(self, image: np.ndarray, mask: Optional[np.ndarray], label: int, pid: str) -> Dict[str, Any]:
-        # 强度裁剪
+        # Intensity clipping
         image = percentile_clip(image, self.clip_percentiles[0], self.clip_percentiles[1])
         # [0,1]
         image = scale_to_01(image)
-        # resize
+        # Resize
         image, mask = resize_image_and_mask(image, mask, self.img_size)
         # z-score
         if self.use_zscore and self.znorm is not None:
             image = self.znorm(image)
-        # 返回
+        # Return
         out = {"image": image.astype(np.float32), "mask": None if mask is None else mask.astype(np.float32),
                "label": int(label), "pid": pid}
         return out
