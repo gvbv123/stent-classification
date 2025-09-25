@@ -20,12 +20,12 @@ from src.models.factory import ModelFactory
 def main(cfg_paths):
     cfg = load_config(cfg_paths)
 
-    # 1) 固定权重路径：从配置 TEST.CKPT_PATH 读取
+    # 1) Load checkpoint path from configuration
     ckpt_path = cfg["TEST"]["CKPT_PATH"]
     if not os.path.isfile(ckpt_path):
-        raise FileNotFoundError(f"指定的模型权重不存在: {ckpt_path}")
+        raise FileNotFoundError(f"Specified model checkpoint does not exist: {ckpt_path}")
 
-    # 2) 为“测试结果”单独创建输出目录（时间戳目录）
+    # 2) Create output directory for "test results" (with timestamp)
     dirs = make_output_dirs(cfg)
 
     # 3) Dataset / Dataloader
@@ -39,37 +39,37 @@ def main(cfg_paths):
     )
     test_loader = DataLoader(
         test_set,
-        batch_size=cfg["TRAIN"]["BATCH_SIZE"],  # 如需单独设置测试 batch，可在 YAML 里加 TEST.BATCH_SIZE
+        batch_size=cfg["TRAIN"]["BATCH_SIZE"],  
         shuffle=False,
         num_workers=cfg["DATA"].get("NUM_WORKERS", 0),
         pin_memory=True
     )
 
-    # 4) Model & load ckpt（使用固定 ckpt_path，而不是新目录）
+    # 4) Load model and checkpoint (use fixed ckpt_path instead of a new directory)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = ModelFactory.build(cfg).to(device)
     model = load_checkpoint(model, ckpt_path, device=device)
-    print(f"[TEST] Loaded ckpt: {ckpt_path}")
+    print(f"[TEST] Loaded checkpoint: {ckpt_path}")
 
-    # 5) 推理
+    # 5) Inference
     df_preds = infer_external(
         model, test_loader, device,
         out_csv=os.path.join(dirs["outputs"], "predictions.csv")
     )
 
-    # 6) 指标
+    # 6) Metrics
     metrics = compute_basic_metrics(
         df_preds["label"].values, df_preds["prob"].values, prefix="test_"
     )
 
-    # 7) 置信区间
+    # 7) Confidence intervals
     auc, ci = delong_ci(df_preds["label"].values, df_preds["prob"].values)
     boot_ci = bootstrap_ci(
         df_preds["label"].values, df_preds["prob"].values,
         n_bootstrap=cfg["STATS"]["BOOTSTRAP_ITERS"]
     )
 
-    # 8) DCA 导出 CSV（后续 R 画图）
+    # 8) DCA export to CSV (for plotting in R)
     dca_df = export_dca_csv(
         df_preds["label"].values, df_preds["prob"].values,
         os.path.join(dirs["outputs"], "dca_curve.csv"),
@@ -78,7 +78,7 @@ def main(cfg_paths):
         tstep=cfg["DCA"]["THRESH_STEP"]
     )
 
-    # 9) 导出所有结果
+    # 9) Export all results
     exp = Exporter(dirs["outputs"])
     exp.save_predictions(df_preds)
     exp.save_metrics(metrics)
@@ -89,6 +89,6 @@ def main(cfg_paths):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", nargs="+", required=True, help="配置文件路径（默认 + 子配置）")
+    parser.add_argument("--config", nargs="+", required=True, help="Path to configuration file (including main and sub-configurations)")
     args = parser.parse_args()
     main(args.config)
