@@ -3,10 +3,10 @@ from sklearn.metrics import roc_auc_score, average_precision_score, confusion_ma
 
 def compute_basic_metrics(y_true, y_prob, prefix=""):
     """
-    计算基础分类指标
+    Compute basic classification metrics.
     Args:
         y_true: list[int] or np.array
-        y_prob: list[float] 概率（正类）
+        y_prob: list[float] probabilities for the positive class
     Returns:
         dict
     """
