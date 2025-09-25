@@ -4,7 +4,7 @@ import os
 
 def compute_net_benefit(y_true, y_prob, thresholds):
     """
-    决策曲线：计算每个阈值的 net benefit
+    Decision Curve Analysis: Calculate net benefit for each threshold.
     NB = (TP/N) - (FP/N) * (pt/(1-pt))
     """
     y_true = np.array(y_true)
@@ -25,5 +25,5 @@ def export_dca_csv(y_true, y_prob, out_csv, tmin=0.05, tmax=0.60, tstep=0.01):
     df = pd.DataFrame(rows)
     os.makedirs(os.path.dirname(out_csv), exist_ok=True)
     df.to_csv(out_csv, index=False)
-    print(f"[DCA] exported -> {out_csv}")
+    print(f"[DCA] Exported -> {out_csv}")
     return df
