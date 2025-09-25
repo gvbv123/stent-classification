@@ -5,9 +5,7 @@ import cv2
 import os
 
 class GradCAM:
-    """
-    简化版 Grad-CAM，用于分类网络
-    """
+    
     def __init__(self, model, target_layer):
         self.model = model
         self.target_layer = target_layer
@@ -17,7 +15,7 @@ class GradCAM:
         self._register_hooks()
 
     def _find_layer(self):
-        """根据字符串路径找到目标层"""
+        """Find the target layer by its string path."""
         layer = self.model
         for attr in self.target_layer.split("."):
             if attr.endswith("]"):  # e.g., layer4[-1].conv2
@@ -38,11 +36,12 @@ class GradCAM:
 
     def generate(self, x, class_idx=None):
         """
+        Generate a heatmap for the class index (default is the argmax of logits).
         Args:
-            x: (1,C,H,W) 输入
-            class_idx: 目标类别 (默认=logits argmax)
+            x: (1,C,H,W) input tensor
+            class_idx: Target class index (default is the logits argmax)
         Returns:
-            heatmap: (H,W) 0-1
+            heatmap: (H,W) heatmap scaled to [0, 1]
         """
         self.model.zero_grad()
         logits = self.model(x)  # (1,2) or (1,)
@@ -67,10 +66,10 @@ class GradCAM:
 
 def overlay_heatmap(img, cam, alpha=0.5, colormap=cv2.COLORMAP_JET):
     """
-    把 CAM 叠加到原图上
+    Overlay the CAM heatmap onto the original image.
     Args:
-        img: (H,W) float 或 uint8，范围[0,1]或[0,255]
-        cam: (H,W) float，范围[0,1]
+        img: (H,W) float or uint8, range [0,1] or [0,255]
+        cam: (H,W) float, range [0,1]
     """
     if img.max() <= 1.0:
         img_disp = (img * 255).astype(np.uint8)
