@@ -19,7 +19,7 @@ def main(cfg_paths):
     set_seed(cfg["TRAIN"]["SEED"])
     dirs = make_output_dirs(cfg)
 
-    # 读取全体训练数据
+    # 1) Load entire training dataset
     df = pd.read_csv(cfg["DATA"]["TRAIN"]["LABEL_CSV"])
     y_all = df["label"].values
     kfold = StratifiedKFold(n_splits=cfg["DATA"]["SPLITS"]["FOLDS"], shuffle=True, random_state=cfg["TRAIN"]["SEED"])
@@ -31,10 +31,10 @@ def main(cfg_paths):
         train_df = df.iloc[train_idx]
         val_df = df.iloc[val_idx]
 
-        # 采样 pos_weight
+        # 2) Sample pos_weight
         pos_weight = compute_pos_weight(train_df["label"].values)
 
-        # dataset
+        # 3) Dataset
         train_set = StentDataset(
             image_dir=cfg["DATA"]["TRAIN"]["IMAGE_DIR"],
             mask_dir=cfg["DATA"]["TRAIN"]["MASK_DIR"],
@@ -58,7 +58,7 @@ def main(cfg_paths):
         train_loader = DataLoader(train_subset, batch_size=cfg["TRAIN"]["BATCH_SIZE"], shuffle=True)
         val_loader = DataLoader(val_subset, batch_size=cfg["TRAIN"]["BATCH_SIZE"], shuffle=False)
 
-        # model
+        # 4) Model
         from src.models.factory import ModelFactory
         model = ModelFactory.build(cfg)
 
@@ -68,7 +68,7 @@ def main(cfg_paths):
                           out_dir=dirs["runs"])
         history = trainer.train()
 
-        # 保存日志
+        # 5) Save logs
         log_path = os.path.join(dirs["runs"], f"log_fold{fold}.csv")
         pd.DataFrame(history).to_csv(log_path, index=False)
 
@@ -77,6 +77,6 @@ def main(cfg_paths):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", nargs="+", required=True, help="配置文件路径（默认 + 子配置）")
+    parser.add_argument("--config", nargs="+", required=True, help="Path to configuration file (including main and sub-configurations)")
     args = parser.parse_args()
     main(args.config)
