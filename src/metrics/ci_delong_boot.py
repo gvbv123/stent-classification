@@ -4,7 +4,6 @@ from sklearn.utils import resample
 from typing import Tuple
 
 # ---- DeLong implementation ----
-# 引用自 https://github.com/yandexdataschool/roc_comparison (简化版)
 import scipy.stats as st
 
 def _compute_midrank(x):
@@ -45,7 +44,7 @@ def _fastDeLong(predictions_sorted_transposed, label_1_count):
     delongcov = sx / m + sy / n
     return aucs, delongcov
 
-def delong_ci(y_true, y_prob, alpha=0.95) -> Tuple[float, Tuple[float,float]]:
+def delong_ci(y_true, y_prob, alpha=0.95) -> Tuple[float, Tuple[float, float]]:
     y_true = np.array(y_true)
     y_prob = np.array(y_prob)
     order = np.argsort(-y_prob)
