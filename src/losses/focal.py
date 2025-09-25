@@ -4,9 +4,9 @@ import torch.nn.functional as F
 
 class FocalLoss(nn.Module):
     """
-    二分类 Focal Loss
-    gamma: 聚焦参数
-    alpha: 类别平衡因子 (float 或 None)
+    Binary classification Focal Loss.
+    gamma: focusing parameter
+    alpha: class balance factor (float or None)
     """
     def __init__(self, gamma=2.0, alpha=None, reduction="mean"):
         super().__init__()
@@ -17,11 +17,11 @@ class FocalLoss(nn.Module):
     def forward(self, logits, targets):
         """
         Args:
-            logits: (N,2) 或 (N,) 原始logits
-            targets: (N,) int64 [0,1]
+            logits: (N, 2) or (N,) raw logits.
+            targets: (N,) int64 [0, 1]
         """
         if logits.ndim == 2 and logits.shape[1] == 2:
-            logits = logits[:, 1]  # 取正类logit
+            logits = logits[:, 1]  # Select logits for the positive class
         targets = targets.float()
 
         bce_loss = F.binary_cross_entropy_with_logits(logits, targets, reduction="none")
