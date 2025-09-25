@@ -4,14 +4,14 @@ import numpy as np
 
 def make_gallery(cam_list, labels, preds, probs, pids, save_path, ncols=3):
     """
-    把多张 CAM 图拼接成画廊
+    Create a gallery by stitching multiple CAM images together.
     Args:
-        cam_list: List[np.ndarray], 每张(H,W,3) BGR
-        labels: List[int], 真值
-        preds: List[int], 预测
-        probs: List[float], 预测概率
-        pids: List[str], 病人ID
-        save_path: 保存路径
+        cam_list: List[np.ndarray], each (H,W,3) BGR image
+        labels: List[int], true labels
+        preds: List[int], predicted labels
+        probs: List[float], predicted probabilities
+        pids: List[str], patient IDs
+        save_path: Path to save the gallery
     """
     n = len(cam_list)
     nrows = int(np.ceil(n / ncols))
@@ -26,7 +26,7 @@ def make_gallery(cam_list, labels, preds, probs, pids, save_path, ncols=3):
 
         canvas[y0:y1, x0:x1] = cam
 
-        # 文字标签
+        # Text label
         text = f"ID:{pids[i]} L={labels[i]} P={preds[i]} Pr={probs[i]:.2f}"
         cv2.putText(canvas, text, (x0 + 5, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
                     0.5, (0, 0, 0), 1, cv2.LINE_AA)
