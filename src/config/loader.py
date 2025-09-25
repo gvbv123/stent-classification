@@ -3,11 +3,11 @@ import yaml
 
 def load_config(config_paths):
     """
-    加载配置（支持多个yaml，后者覆盖前者）
+    Load configuration (supports multiple YAML files, later ones will overwrite earlier ones).
     Args:
         config_paths: list[str] or str
     Returns:
-        dict 配置
+        dict: Configuration
     """
     if isinstance(config_paths, str):
         config_paths = [config_paths]
@@ -15,7 +15,7 @@ def load_config(config_paths):
     cfg = {}
     for path in config_paths:
         if not os.path.exists(path):
-            raise FileNotFoundError(f"配置文件不存在: {path}")
+            raise FileNotFoundError(f"Configuration file does not exist: {path}")
         with open(path, "r", encoding="utf-8") as f:
             cfg_part = yaml.safe_load(f)
         cfg = _deep_update(cfg, cfg_part)
@@ -24,7 +24,7 @@ def load_config(config_paths):
 
 def _deep_update(base, updates):
     """
-    递归地更新字典，后者覆盖前者
+    Recursively update the dictionary, with later ones overwriting earlier ones.
     """
     for k, v in updates.items():
         if isinstance(v, dict) and k in base and isinstance(base[k], dict):
