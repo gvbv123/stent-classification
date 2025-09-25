@@ -3,9 +3,9 @@ import torch.nn as nn
 
 def compute_pos_weight(labels):
     """
-    根据标签计算 pos_weight = N_neg / N_pos
+    Compute pos_weight = N_neg / N_pos based on the labels.
     Args:
-        labels: 1D Tensor 或 list，0/1 标签
+        labels: 1D Tensor or list, containing 0/1 labels.
     Returns:
         torch.Tensor([pos_weight])
     """
@@ -19,7 +19,7 @@ def compute_pos_weight(labels):
 
 class BCEWithPosWeight(nn.Module):
     """
-    BCEWithLogitsLoss，支持 pos_weight
+    BCEWithLogitsLoss with support for pos_weight.
     """
     def __init__(self, pos_weight=None):
         super().__init__()
@@ -30,11 +30,11 @@ class BCEWithPosWeight(nn.Module):
     def forward(self, logits, targets):
         """
         Args:
-            logits: (N,2) 或 (N,) 原始logits
-            targets: (N,) int64 [0,1]
+            logits: (N, 2) or (N,) raw logits.
+            targets: (N,) int64 [0, 1]
         """
         if logits.ndim == 2 and logits.shape[1] == 2:
-            # 取正类logit
+            # Select logits for the positive class
             logits = logits[:, 1]
         targets = targets.float()
         return self.criterion(logits, targets)
