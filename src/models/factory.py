@@ -5,7 +5,7 @@ class ModelFactory:
     @staticmethod
     def build(cfg):
         """
-        根据配置构建完整模型
+        Build a complete model based on the configuration.
         cfg: dict
           - MODEL.BACKBONE
           - INPUT.CHANNELS
