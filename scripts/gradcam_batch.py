@@ -16,7 +16,7 @@ from src.xai.cam_gallery import make_gallery
 def main(cfg_paths, out_dir):
     cfg = load_config(cfg_paths)
 
-    # dataset (测试集)
+    # Dataset (Test set)
     test_set = StentDataset(
         image_dir=cfg["DATA"]["TEST"]["IMAGE_DIR"],
         mask_dir=cfg["DATA"]["TEST"]["MASK_DIR"],
@@ -27,7 +27,7 @@ def main(cfg_paths, out_dir):
     )
     loader = DataLoader(test_set, batch_size=1, shuffle=False)
 
-    # model
+    # Model
     model = ModelFactory.build(cfg)
     ckpt = os.path.join("experiments", cfg["OUTPUT"]["RUN_NAME"], "best.ckpt")
     device = "cuda" if torch.cuda.is_available() else "cpu"
