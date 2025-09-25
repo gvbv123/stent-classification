@@ -3,7 +3,7 @@ from .focal import FocalLoss
 
 def get_loss(cfg, pos_weight=None):
     """
-    根据配置构建 loss
+    Build the loss function based on the configuration.
     cfg["LOSS"]["TYPE"]: "bce_posweight" / "focal"
     cfg["LOSS"]["FOCAL_GAMMA"]
     cfg["LOSS"]["FOCAL_ALPHA"]
@@ -19,4 +19,4 @@ def get_loss(cfg, pos_weight=None):
         return FocalLoss(gamma=gamma, alpha=alpha)
 
     else:
-        raise ValueError(f"未知 loss 类型: {loss_type}")
+        raise ValueError(f"Unknown loss type: {loss_type}")
