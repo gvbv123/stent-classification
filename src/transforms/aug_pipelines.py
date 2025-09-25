@@ -7,8 +7,8 @@ from .preprocess import (
     percentile_clip, scale_to_01, resize_image_and_mask, DatasetZScore, apply_clahe
 )
 
-# 为了可控与轻量，这里用 OpenCV + 随机参数实现常用增强
-# 如果你 prefer Albumentations，可把本文件替换为 Albumentations 版（我也能给你）。
+# For control and lightweight implementation, we use OpenCV + random parameters for common augmentations.
+# If you prefer Albumentations, you can replace this file with an Albumentations version.
 
 def random_affine(
     img: np.ndarray,
@@ -18,8 +18,8 @@ def random_affine(
     scale_range: tuple
 ):
     """
-    纯几何增强：旋转/平移/缩放，中心对齐；mask 使用最近邻
-    参数在 [-rot_deg, +rot_deg]、[-trans_ratio, +trans_ratio]、[scale_range] 内随机
+    Purely geometric augmentation: rotation/translation/scale, center-aligned; mask uses nearest neighbor
+    Parameters are randomly chosen within [-rot_deg, +rot_deg], [-trans_ratio, +trans_ratio], [scale_range]
     """
     h, w = img.shape
     angle = random.uniform(-rot_deg, rot_deg)
@@ -44,8 +44,8 @@ def random_brightness_contrast_gamma(
     gamma: float
 ):
     """
-    亮度/对比度/Gamma 增强，输入与输出假定在 [0,1]
-    brightness/contrast/gamma 表示最大偏移幅度（±）
+    Brightness/contrast/gamma augmentation, input and output assumed to be in [0,1]
+    brightness/contrast/gamma represent the maximum shift magnitude (±)
     """
     # brightness
     if brightness > 0:
@@ -65,14 +65,14 @@ def random_brightness_contrast_gamma(
 
 def random_motion_blur(img: np.ndarray, prob: float, kmin: int = 3, kmax: int = 7):
     """
-    简易运动模糊（水平/垂直随机），输入/输出 [0,1]
+    Simple motion blur (random horizontal/vertical), input/output [0,1]
     """
     if random.random() > prob:
         return img
     k = random.randint(kmin, kmax)
     if k % 2 == 0:
         k += 1
-    # 随机选择水平或垂直核
+    # Randomly choose horizontal or vertical kernel
     kernel = np.zeros((k, k), dtype=np.float32)
     if random.random() < 0.5:
         kernel[k//2, :] = 1.0 / k
@@ -85,16 +85,16 @@ def random_motion_blur(img: np.ndarray, prob: float, kmin: int = 3, kmax: int = 
 
 class TrainTransform:
     """
-    训练集增强流水线：
-      p1–p99 裁剪 -> /255 -> resize -> (可选) CLAHE(prob) -> 几何/光照增强 -> z-score
-    所有增强仅作用于图像通道，mask 只做几何变换（保持0/1）
+    Training augmentation pipeline:
+      p1–p99 clipping -> /255 -> resize -> (optional) CLAHE(prob) -> geometric/lighting augmentation -> z-score
+    All augmentations are applied to the image channel only, mask undergoes only geometric transformations (retain 0/1).
     """
     def __init__(
         self,
         img_size: int,
         clip_percentiles=(1.0, 99.0),
         level: str = "light",
-        # light 参数
+        # light parameters
         rot_deg: float = 7,
         trans_slide: float = 0.05,
         scale_range=(0.95, 1.05),
@@ -103,7 +103,7 @@ class TrainTransform:
         gamma: float = 0.10,
         motion_blur_prob: float = 0.10,
         clahe_prob: float = 0.20,
-        # strong 备用参数（当 level="strong" 时覆盖）
+        # strong parameters (override when level="strong")
         strong_params: Optional[dict] = None,
         # z-score
         zscore_stats: Optional[dict] = None
@@ -127,18 +127,18 @@ class TrainTransform:
         self.znorm = DatasetZScore(zscore_stats["mean"], zscore_stats["std"]) if zscore_stats else None
 
     def __call__(self, image: np.ndarray, mask: Optional[np.ndarray], label: int, pid: str) -> Dict[str, Any]:
-        # 1) 强度裁剪 -> [0,1]
+        # 1) Intensity clipping -> [0,1]
         image = percentile_clip(image, self.clip_percentiles[0], self.clip_percentiles[1])
         image = scale_to_01(image)
 
-        # 2) resize（先做几何一致的基准尺寸，增强在此尺寸上进行）
+        # 2) Resize (first apply geometric consistent resizing, augmentations occur at this size)
         image, mask = resize_image_and_mask(image, mask, self.img_size)
 
-        # 3) CLAHE (prob)
+        # 3) CLAHE (probability-based)
         if random.random() < self.params["clahe_prob"]:
             image = apply_clahe(image, clip_limit=2.0, tile_grid_size=8)
 
-        # 4) 几何增强（旋转/平移/缩放）
+        # 4) Geometric augmentation (rotation/translation/scale)
         image, mask = random_affine(
             image, mask,
             rot_deg=self.params["rot_deg"],
@@ -146,7 +146,7 @@ class TrainTransform:
             scale_range=self.params["scale_range"]
         )
 
-        # 5) 光照增强（brightness/contrast/gamma）
+        # 5) Lighting augmentation (brightness/contrast/gamma)
         image = random_brightness_contrast_gamma(
             image,
             brightness=self.params["brightness"],
@@ -154,10 +154,10 @@ class TrainTransform:
             gamma=self.params["gamma"]
         )
 
-        # 6) 运动模糊（prob）
+        # 6) Motion blur (probability-based)
         image = random_motion_blur(image, prob=self.params["motion_blur_prob"], kmin=3, kmax=7)
 
-        # 7) z-score（mask 不变）
+        # 7) z-score (mask remains unchanged)
         if self.znorm is not None:
             image = self.znorm(image)
 
@@ -168,8 +168,8 @@ class TrainTransform:
 
 class EvalTransform:
     """
-    验证/测试集：确定性预处理（无随机增强）
-      p1–p99 裁剪 -> /255 -> resize -> z-score
+    Validation/test set: Deterministic preprocessing (no random augmentations)
+      p1–p99 clipping -> /255 -> resize -> z-score
     """
     def __init__(
         self,
@@ -193,15 +193,15 @@ class EvalTransform:
 
 
 # ------------------------------
-# 工厂函数：根据 cfg 生成 transform
+# Factory function: Generate transform based on cfg
 # ------------------------------
 
 def build_transforms(cfg, split: str, zscore_stats: Optional[dict] = None):
     """
     Args:
-        cfg: 读取自 YAML 的配置对象/字典
+        cfg: Configuration object/dictionary read from YAML
         split: "train" / "val" / "test"
-        zscore_stats: {"mean": float, "std": float}，训练后保存，用于 val/test
+        zscore_stats: {"mean": float, "std": float}, obtained from training, used for val/test
     Returns:
         callable transform(dict) -> dict
     """
@@ -245,7 +245,7 @@ def build_transforms(cfg, split: str, zscore_stats: Optional[dict] = None):
             zscore_stats=zscore_stats
         )
 
-    # 包装成与 dataset.py 兼容的 callable
+    # Wrap for compatibility with dataset.py
     def _wrapper(**data):
         return tfm(**data)
 
