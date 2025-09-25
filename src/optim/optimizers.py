@@ -3,10 +3,10 @@ import torch.optim as optim
 
 def get_optimizer(cfg, model_params):
     """
-    根据配置创建优化器
+    Create an optimizer based on the configuration.
     cfg["OPTIM"]["OPTIMIZER"]: "adamw" / "sgd" / "adam"
-    cfg["OPTIM"]["LR"]: 初始学习率
-    cfg["OPTIM"]["WEIGHT_DECAY"]: 权重衰减
+    cfg["OPTIM"]["LR"]: Initial learning rate
+    cfg["OPTIM"]["WEIGHT_DECAY"]: Weight decay
     """
     opt_name = cfg["OPTIM"]["OPTIMIZER"].lower()
     lr = float(cfg["OPTIM"]["LR"])
@@ -19,4 +19,4 @@ def get_optimizer(cfg, model_params):
     elif opt_name == "sgd":
         return optim.SGD(model_params, lr=lr, momentum=0.9, nesterov=True, weight_decay=wd)
     else:
-        raise ValueError(f"未知优化器: {opt_name}")
+        raise ValueError(f"Unknown optimizer: {opt_name}")
