@@ -1,17 +1,17 @@
-# 覆盖为：全图模式（单通道）
+# Override for full image mode (single channel)
 OUTPUT:
-  RUN_NAME: "50li9wuyanmo"
+  RUN_NAME: ""
 
 INPUT:
   MODE: "full"
   CHANNELS: 1
-  IMG_SIZE: 300
+  IMG_SIZE: 256
 
 MODEL:
   BACKBONE: "efficientnet_b3"
 
 AUG:
-  LEVEL: "light"   # 首次跑建议 light
+  LEVEL: "light"   # First time running, recommended "light"
 
 TEST:
-  CKPT_PATH: "F:/deepMDA/9yue9ri/50li9wuyanmo/20250913-162410/runs/best.ckpt"
+  CKPT_PATH: "${MODEL_PATH}/runs/best.ckpt"
