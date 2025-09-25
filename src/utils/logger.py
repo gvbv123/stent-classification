@@ -3,7 +3,7 @@ import csv
 
 class CSVLogger:
     """
-    简单 CSV 日志器，用于记录训练过程指标
+    Simple CSV logger for recording training metrics.
     """
     def __init__(self, log_path, fieldnames):
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
