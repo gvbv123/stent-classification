@@ -3,24 +3,7 @@
 This project provides a complete 2D deep learning pipeline for predicting in-stent restenosis (ISR) in coronary angiography.  
 It includes model training, external testing, Grad-CAM visualization, calibration curve plotting, and decision curve analysis (DCA).
 
----
 
-## 📂 Dataset Download and Placement
-The dataset can be downloaded from **Zenodo**:  
-DOI: [10.5281/zenodo.17164388](https://doi.org/10.5281/zenodo.17164388)
-https://doi.org/10.5281/zenodo.17164388
-
-**Example directory structure after extraction:**
-dataset_root/
-├── images/
-│ ├── train/xxx_stent.jpg
-│ ├── test/xxx_stent.jpg
-├── masks/
-│ ├── train/xxx_stent.png
-│ ├── test/xxx_stent.png
-├── labels/
-│ ├── train.csv
-│ ├── test.csv
 
 
 
