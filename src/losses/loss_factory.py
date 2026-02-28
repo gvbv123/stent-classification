@@ -2,7 +2,6 @@ from .bce_posweight import BCEWithPosWeight
 from .focal import FocalLoss
 
 def get_loss(cfg, pos_weight=None):
-
     loss_type = cfg["LOSS"]["TYPE"].lower()
 
     if loss_type == "bce_posweight":
