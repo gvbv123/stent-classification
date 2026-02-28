@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 def compute_pos_weight(labels):
-
     labels = torch.tensor(labels)
     pos = (labels == 1).sum().item()
     neg = (labels == 0).sum().item()
@@ -19,7 +18,6 @@ class BCEWithPosWeight(nn.Module):
         self.criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
     def forward(self, logits, targets):
- 
         if logits.ndim == 2 and logits.shape[1] == 2:
             logits = logits[:, 1]
         targets = targets.float()
