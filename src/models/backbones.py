@@ -17,7 +17,6 @@ def adapt_first_conv(model: nn.Module, in_channels: int):
     if in_channels is None:
         return model
 
-    # Traverse and find the first Conv2d layer, its parent module, and its name in the parent module
     first_conv, parent, name = None, None, None
     for module_name, module in model.named_modules():
         if isinstance(module, nn.Conv2d):
@@ -65,15 +64,11 @@ def adapt_first_conv(model: nn.Module, in_channels: int):
         if old.bias is not None:
             new_conv.bias.copy_(old.bias.data)
 
-    # Replace the first convolution with the new one
     _replace_module(parent, name, new_conv)
     return model
 
 
 def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
-    """
-    Return the backbone and the output feature dimension.
-    """
     name = name.lower()
     if name == "resnet18":
         model = tvm.resnet18(weights="IMAGENET1K_V1" if pretrained else None)
@@ -112,7 +107,7 @@ def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
             num_classes=0,
             global_pool="avg"
         )
-        model = adapt_first_conv(model, in_channels)  # Adapt for 1/2 channels
+        model = adapt_first_conv(model, in_channels)  
         feat_dim = model.num_features
         return model, feat_dim
 
