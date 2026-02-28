@@ -17,6 +17,8 @@ results/
 export/
 logs/
 runs/
+experiments/
+outputs/
 
 # IDE
 .vscode/
