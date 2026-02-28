@@ -2,9 +2,6 @@ import os
 import csv
 
 class CSVLogger:
-    """
-    Simple CSV logger for recording training metrics.
-    """
     def __init__(self, log_path, fieldnames):
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         self.log_path = log_path
