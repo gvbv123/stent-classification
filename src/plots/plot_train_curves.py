@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def plot_train_curves(log_csv, out_dir):
-    """
-    Draw a curve from the training log CSV (epoch, train-loss, val_auc...)
-    """
     df = pd.read_csv(log_csv)
     os.makedirs(out_dir, exist_ok=True)
 
