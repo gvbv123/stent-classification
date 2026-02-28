@@ -1,9 +1,9 @@
 # ====== Global Default Configuration ======
 OUTPUT:
-  ROOT: "${OUTPUT_PATH}/9yue9ri"                # Experiment root directory
-  RUN_NAME: "baseline"                          # Semantic name, sub-configurations will override this
+  ROOT: "./experiments"                         # Experiment root directory
+  RUN_NAME: "mask_guided_densenet121"           # Semantic name, sub-configurations will override this
   USE_TIMESTAMP: true                           # Generate timestamp subdirectory on every run
-  TIMESTAMP_FMT: "%Y%m%d-%H%M%S"                # Timestamp format: 20250909-2142
+  TIMESTAMP_FMT: "%Y%m%d-%H%M%S"                # Timestamp format: 20260228-2142
 
 DATA:
   TRAIN:
@@ -31,6 +31,7 @@ PREPROCESS:
   SCALE_TO_01: true               # Scale to [0,1] by dividing by 255
   NORM: "zscore_dataset"          # Normalize using training dataset mean/std
   NORM_STATS_FROM: "train_only"   # Calculate stats from the training set only
+  TARGET_SPACING: 0.12            # Align with Manuscript: Physical Resampling to 0.12 mm/pixel
 
 AUG:
   LEVEL: "light"      # ["light", "strong", "none"]
@@ -55,22 +56,22 @@ AUG:
     CLAHE_PROB: 0.30
 
 MODEL:
-  BACKBONE: "efficientnet_b3"     # Available models: resnet18 / convnext_tiny / densenet121 / swin_tiny / efficientnet_b0 / efficientnet_b2 / efficientnet_b3
-  PRETRAINED: false
-  CKPT_PATH: "${MODEL_PATH}/efficientnet_b320250912-161910/runs/best.ckpt"   # Leave empty or specify absolute path
-  DROPOUT: 0.2
+  BACKBONE: "densenet121"         # Available models: densenet121 / resnet18 / convnext_tiny / swin_tiny / efficientnet_b0/b2/b3
+  PRETRAINED: true                # Use ImageNet pre-trained weights for better convergence
+  CKPT_PATH: ""                   # Leave empty for training, specify absolute path for testing
+  DROPOUT: 0.3                    # Dropout rate to prevent overfitting on small medical datasets
 
 LOSS:
-  TYPE: "bce_posweight"           # Available options: "focal"
+  TYPE: "bce_posweight"           # Available options: "bce_posweight", "focal"
   FOCAL_GAMMA: 2.0
   FOCAL_ALPHA: null               # If using focal, set between 0.25~0.5
 
 OPTIM:
   OPTIMIZER: "adamw"
-  LR: 0.0003
-  WEIGHT_DECAY: 0.0001
-  SCHEDULER: "steplr"             # Available options: "steplr", "cosine"
-  WARMUP_EPOCHS: 3
+  LR: 0.0001
+  WEIGHT_DECAY: 0.01
+  SCHEDULER: "cosine"             # Cosine annealing scheduler for smoother convergence
+  WARMUP_EPOCHS: 5
   STEPLR_STEP: 10
   STEPLR_GAMMA: 0.1
 
@@ -80,7 +81,7 @@ TRAIN:
   MIXED_PRECISION: true
   GRAD_CLIP_NORM: 1.0
   EARLY_STOP_METRIC: "val_auc"
-  EARLY_STOP_PATIENCE: 10
+  EARLY_STOP_PATIENCE: 15
   SEED: 2025                     # For multiple random seeds, can rerun with 2023/2024
 
 THRESHOLD:
@@ -91,6 +92,7 @@ STATS:
   AUC_CI: "delong"               # Main paper: DeLong test
   BOOTSTRAP_ITERS: 2000          
   BOOTSTRAP_STRATIFY: ["label"]
+  CALIBRATION_ECE: true          # Calculate Expected Calibration Error
 
 DCA:
   EXPORT_CSV: true               
@@ -101,12 +103,12 @@ DCA:
 XAI:
   ENABLE: true
   TARGET_LAYER:
+    densenet121: "features.denseblock4"
     resnet18: "layer4[-1].conv2"
     efficientnet_b0: "features[-1]"
     efficientnet_b2: "features[-1]"    
     efficientnet_b3: "features[-1]"    
     convnext_tiny: "features[-1]"
-    densenet121: "features.denseblock4"
     swin_tiny: "attn_rollout"
   N_SAMPLES: {tp: 3, tn: 3, fn: 2, fp: 1}
   ROI_ENERGY: true
