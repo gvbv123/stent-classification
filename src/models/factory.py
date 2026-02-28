@@ -4,13 +4,6 @@ from .heads import ClassificationHead
 class ModelFactory:
     @staticmethod
     def build(cfg):
-        """
-        Build a complete model based on the configuration.
-        cfg: dict
-          - MODEL.BACKBONE
-          - INPUT.CHANNELS
-          - MODEL.DROPOUT
-        """
         backbone_name = cfg["MODEL"]["BACKBONE"]
         in_ch = int(cfg["INPUT"]["CHANNELS"])
         pretrained = bool(cfg["MODEL"]["PRETRAINED"])
