@@ -1,6 +1,6 @@
-# Override for full image mode (single channel)
+# Override for full image mode (single channel baseline)
 OUTPUT:
-  RUN_NAME: ""
+  RUN_NAME: "full_image_densenet121"
 
 INPUT:
   MODE: "full"
@@ -8,10 +8,10 @@ INPUT:
   IMG_SIZE: 256
 
 MODEL:
-  BACKBONE: "efficientnet_b3"
+  BACKBONE: "densenet121"        
 
 AUG:
-  LEVEL: "light"   # First time running, recommended "light"
+  LEVEL: "light"                 
 
 TEST:
-  CKPT_PATH: "${MODEL_PATH}/runs/best.ckpt"
+  CKPT_PATH: "${MODEL_PATH}/runs/best.ckpt"   
