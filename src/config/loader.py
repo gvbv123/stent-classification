@@ -2,13 +2,7 @@ import os
 import yaml
 
 def load_config(config_paths):
-    """
-    Load configuration (supports multiple YAML files, later ones will overwrite earlier ones).
-    Args:
-        config_paths: list[str] or str
-    Returns:
-        dict: Configuration
-    """
+  
     if isinstance(config_paths, str):
         config_paths = [config_paths]
 
@@ -23,9 +17,7 @@ def load_config(config_paths):
 
 
 def _deep_update(base, updates):
-    """
-    Recursively update the dictionary, with later ones overwriting earlier ones.
-    """
+ 
     for k, v in updates.items():
         if isinstance(v, dict) and k in base and isinstance(base[k], dict):
             base[k] = _deep_update(base[k], v)
