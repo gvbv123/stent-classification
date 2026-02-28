@@ -2,10 +2,6 @@ import os
 import datetime
 
 def make_output_dirs(cfg):
-    """
-    Create output directories with a timestamp based on the configuration.
-    Returns a dictionary: {runs, outputs, figures}
-    """
     root = cfg["OUTPUT"]["ROOT"]
     run_name = cfg["OUTPUT"]["RUN_NAME"]
     use_ts = cfg["OUTPUT"].get("USE_TIMESTAMP", True)
