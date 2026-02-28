@@ -60,7 +60,6 @@ class Trainer:
 
                 self.scaler.scale(loss).backward()
 
-                # Optional: clip gradients only when threshold is greater than 0
                 clip_val = float(self.cfg["TRAIN"].get("GRAD_CLIP_NORM", 0.0))
                 if clip_val and clip_val > 0:
                     torch.nn.utils.clip_grad_norm_(self.model.parameters(), clip_val)
