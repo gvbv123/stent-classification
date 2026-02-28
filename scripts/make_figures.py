@@ -1,4 +1,3 @@
-# scripts/make_figures.py
 import os
 import json
 import glob
