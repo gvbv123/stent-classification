@@ -4,9 +4,7 @@ from src.metrics.basic_metrics import compute_basic_metrics
 
 @torch.no_grad()
 def evaluate(model, loader, device):
-    """
-    Evaluate on the validation set and return metrics as a dictionary.
-    """
+    
     model.eval()
     y_true, y_prob = [], []
 
