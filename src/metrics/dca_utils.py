@@ -3,10 +3,6 @@ import pandas as pd
 import os
 
 def compute_net_benefit(y_true, y_prob, thresholds):
-    """
-    Decision Curve Analysis: Calculate net benefit for each threshold.
-    NB = (TP/N) - (FP/N) * (pt/(1-pt))
-    """
     y_true = np.array(y_true)
     y_prob = np.array(y_prob)
     N = len(y_true)
