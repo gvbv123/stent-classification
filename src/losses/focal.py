@@ -11,7 +11,6 @@ class FocalLoss(nn.Module):
         self.reduction = reduction
 
     def forward(self, logits, targets):
-        
         if logits.ndim == 2 and logits.shape[1] == 2:
             logits = logits[:, 1]  # Select logits for the positive class
         targets = targets.float()
