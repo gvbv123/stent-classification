@@ -3,16 +3,6 @@ import cv2
 import numpy as np
 
 def make_gallery(cam_list, labels, preds, probs, pids, save_path, ncols=3):
-    """
-    Create a gallery by stitching multiple CAM images together.
-    Args:
-        cam_list: List[np.ndarray], each (H,W,3) BGR image
-        labels: List[int], true labels
-        preds: List[int], predicted labels
-        probs: List[float], predicted probabilities
-        pids: List[str], patient IDs
-        save_path: Path to save the gallery
-    """
     n = len(cam_list)
     nrows = int(np.ceil(n / ncols))
     h, w, _ = cam_list[0].shape
