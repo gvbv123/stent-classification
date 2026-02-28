@@ -2,12 +2,6 @@ import torch
 import torch.optim as optim
 
 def get_optimizer(cfg, model_params):
-    """
-    Create an optimizer based on the configuration.
-    cfg["OPTIM"]["OPTIMIZER"]: "adamw" / "sgd" / "adam"
-    cfg["OPTIM"]["LR"]: Initial learning rate
-    cfg["OPTIM"]["WEIGHT_DECAY"]: Weight decay
-    """
     opt_name = cfg["OPTIM"]["OPTIMIZER"].lower()
     lr = float(cfg["OPTIM"]["LR"])
     wd = float(cfg["OPTIM"]["WEIGHT_DECAY"])
