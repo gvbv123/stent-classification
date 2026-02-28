@@ -13,7 +13,6 @@ torchvision==0.17.2
 
 # Vision / Aug
 opencv-python>=4.8
-albumentations>=1.3
 timm>=0.9.16
 
 # Plots
