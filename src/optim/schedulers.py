@@ -3,9 +3,6 @@ import math
 from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
 
 class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
-    """
-    Cosine annealing learning rate scheduler with warmup.
-    """
     def __init__(self, optimizer, warmup_epochs, max_epochs, min_lr=1e-6, last_epoch=-1):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
@@ -27,13 +24,6 @@ class WarmupCosineLR(torch.optim.lr_scheduler._LRScheduler):
 
 
 def get_scheduler(cfg, optimizer):
-    """
-    Create a scheduler based on the configuration.
-    cfg["OPTIM"]["SCHEDULER"]: "cosine" / "steplr"
-    cfg["TRAIN"]["EPOCHS"]
-    cfg["OPTIM"]["WARMUP_EPOCHS"]
-    cfg["OPTIM"]["STEPLR_STEP"], cfg["OPTIM"]["STEPLR_GAMMA"]
-    """
     sched_name = cfg["OPTIM"]["SCHEDULER"].lower()
     max_epochs = int(cfg["TRAIN"]["EPOCHS"])
 
