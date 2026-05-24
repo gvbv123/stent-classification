@@ -2,13 +2,13 @@ import torch
 import torch.nn as nn
 import torchvision.models as tvm
 import numpy as np
+from typing import Tuple
 
 try:
     import timm
     _has_timm = True
 except ImportError:
     _has_timm = False
-
 
 def _replace_module(parent, name, new):
     setattr(parent, name, new)
@@ -20,7 +20,6 @@ def adapt_first_conv(model: nn.Module, in_channels: int):
     first_conv, parent, name = None, None, None
     for module_name, module in model.named_modules():
         if isinstance(module, nn.Conv2d):
-            # Find the name of the module in the parent and the parent reference
             parts = module_name.split(".")
             parent = model
             for p in parts[:-1]:
@@ -34,7 +33,7 @@ def adapt_first_conv(model: nn.Module, in_channels: int):
 
     old = first_conv
     if old.in_channels == in_channels:
-        return model  
+        return model
 
     new_conv = nn.Conv2d(
         in_channels,
@@ -43,22 +42,19 @@ def adapt_first_conv(model: nn.Module, in_channels: int):
         stride=old.stride,
         padding=old.padding,
         dilation=old.dilation,
-        groups=old.groups if old.groups == 1 else 1,  
+        groups=old.groups if old.groups == 1 else 1,
         bias=(old.bias is not None)
     )
 
     with torch.no_grad():
-        W = old.weight.data  # [out_c, in_c_old, k, k]
+        W = old.weight.data
         if in_channels == 1 and W.shape[1] >= 3:
-            # Grayscale: average RGB weights along the channel dimension
             new_conv.weight.copy_(W.mean(dim=1, keepdim=True))
         elif in_channels > W.shape[1]:
-            # More channels: repeat and trim, scale by the repetition factor
             rep = int(np.ceil(in_channels / W.shape[1]))
             W_rep = W.repeat(1, rep, 1, 1)[:, :in_channels, :, :] / rep
             new_conv.weight.copy_(W_rep)
         else:
-            # Fewer channels: directly take the first in_channels
             new_conv.weight.copy_(W[:, :in_channels, :, :])
 
         if old.bias is not None:
@@ -67,9 +63,9 @@ def adapt_first_conv(model: nn.Module, in_channels: int):
     _replace_module(parent, name, new_conv)
     return model
 
-
-def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
+def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True) -> Tuple[nn.Module, int]:
     name = name.lower()
+
     if name == "resnet18":
         model = tvm.resnet18(weights="IMAGENET1K_V1" if pretrained else None)
         model = adapt_first_conv(model, in_channels)
@@ -94,7 +90,7 @@ def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
             num_classes=0,
             global_pool="avg"
         )
-        model = adapt_first_conv(model, in_channels)  # Adapt for 1/2 channels
+        model = adapt_first_conv(model, in_channels)
         feat_dim = model.num_features
         return model, feat_dim
 
@@ -107,7 +103,33 @@ def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
             num_classes=0,
             global_pool="avg"
         )
-        model = adapt_first_conv(model, in_channels)  
+        model = adapt_first_conv(model, in_channels)
+        feat_dim = model.num_features
+        return model, feat_dim
+
+    elif name == "efficientnetv2_s":
+        if not _has_timm:
+            raise ImportError("timm is required: pip install timm")
+        model = timm.create_model(
+            "efficientnetv2_rw_s",
+            pretrained=pretrained,
+            num_classes=0,
+            global_pool="avg"
+        )
+        model = adapt_first_conv(model, in_channels)
+        feat_dim = model.num_features
+        return model, feat_dim
+
+    elif name == "swin_v2_tiny":
+        if not _has_timm:
+            raise ImportError("timm is required: pip install timm")
+        model = timm.create_model(
+            "swinv2_tiny_window16_256",
+            pretrained=pretrained,
+            num_classes=0,
+            global_pool="avg",
+            in_chans=in_channels,
+        )
         feat_dim = model.num_features
         return model, feat_dim
 
@@ -121,10 +143,9 @@ def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
 
     elif name == "densenet121":
         model = tvm.densenet121(weights="IMAGENET1K_V1" if pretrained else None)
-        model.features[-1] = nn.Identity()  
         model.classifier = nn.Identity()
         model = adapt_first_conv(model, in_channels)
-        feat_dim = 1024 
+        feat_dim = 1024
         return model, feat_dim
 
     elif name == "swin_tiny":
@@ -135,7 +156,7 @@ def get_backbone(name: str, in_channels: int = 1, pretrained: bool = True):
             pretrained=pretrained,
             num_classes=0,
             global_pool="avg",
-            in_chans=in_channels, 
+            in_chans=in_channels,
         )
         feat_dim = model.num_features
         return model, feat_dim
