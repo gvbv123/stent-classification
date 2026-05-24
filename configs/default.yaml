@@ -110,5 +110,7 @@ XAI:
     efficientnet_b3: "features[-1]"    
     convnext_tiny: "features[-1]"
     swin_tiny: "attn_rollout"
+    efficientnetv2_s: "blocks[-1]"      
+    swin_v2_tiny: "attn_rollout"       
   N_SAMPLES: {tp: 3, tn: 3, fn: 2, fp: 1}
   ROI_ENERGY: true
